@@ -23,5 +23,8 @@ bool pq_insert(PriorityQueue *pq, const char *data);
 void pq_remove(PriorityQueue *pq);
 bool pq_is_empty(PriorityQueue *pq);
 int pq_size(PriorityQueue *pq);
+const char* getQuestion(PriorityQueue *pq);
+void prtAnswers(PriorityQueue *pq);
+bool checkAnswer(PriorityQueue*pq, int input);
 
 #endif // PRIORITY_QUEUE_H
