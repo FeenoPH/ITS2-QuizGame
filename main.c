@@ -8,7 +8,6 @@
 
 #define MAX_LINE_LEN 200
 
-// Create a priority queue
 PriorityQueue* pq_create(void) {
     PriorityQueue *pq = (PriorityQueue*)malloc(sizeof(PriorityQueue));
     if(pq == NULL) {
@@ -19,7 +18,6 @@ PriorityQueue* pq_create(void) {
     return pq;
 }
 
-// Destroy the priority queue
 void pq_destroy(PriorityQueue *pq) {
     if(pq == NULL) {
         return;
@@ -36,12 +34,10 @@ void pq_destroy(PriorityQueue *pq) {
     free(pq); // Free the priority queue structure
 }
 
-// Check if the priority queue is empty
 bool pq_is_empty(PriorityQueue *pq) {
     return (pq == NULL || pq->size == 0);
 }
 
-// Insert a question/answer node into the pqueue based on timesWrong
 // MAKE CLEANER
 bool pq_insert(PriorityQueue *pq, const char *string) {
     struct QASet *newNode = (struct QASet*) malloc(sizeof(struct QASet));
@@ -92,7 +88,6 @@ bool pq_insert(PriorityQueue *pq, const char *string) {
     }
 }
 
-// Remove the most wrong question
 void pq_remove(PriorityQueue *pq) {
     struct QASet *old_head = pq->head;
     pq->head = pq->head->next;
@@ -102,19 +97,37 @@ void pq_remove(PriorityQueue *pq) {
     
     free(tempQuestion);
     free(tempAnswer);
-    free(tempWrong);
+    //free(tempWrong);
     free(old_head);
     pq->size -= 1;
 
     return;
 }
 
-// Get the current size of the priority queue
 int pq_size(PriorityQueue *pq) {
     return pq ? pq->size : 0;
 }
 
+const char* getQuestion(PriorityQueue *pq) {
+    return pq->head->question;
+}
+
+void prtAnswers(PriorityQueue *pq) {
+    char *first = pq->head->answer;
+    char *second = pq->head->next->answer;
+    char *third = pq->head->next->next->answer;
+    char *fourth = pq->head->next->next->next->answer;
+
+    //print these four strings in a random order
+}
+
+bool checkAnswer(PriorityQueue*pq, int input) {
+    return true;
+}
+
 int main(){
+    int input = 0;
+
     PriorityQueue *pq = pq_create();
     if(pq == NULL) {
         fprintf(stderr, "Failed to create priority queue\n");
@@ -125,10 +138,8 @@ int main(){
     char ch;
     char line[MAX_LINE_LEN];
 
-    // Open the file in read mode
     file = fopen("questions.txt", "r");
 
-    // Check if file was successfully opened
     if(file == NULL) {
         printf("Could not open file\n");
         return 1;
@@ -138,14 +149,21 @@ int main(){
         pq_insert(pq, line);
     }
     
-    printf("%s\n", pq->head->question);
-    printf("%s\n", pq->head->answer);
-    printf("%d\n", pq->head->timesWrong);
-    printf("%s\n", pq->head->next->question);
-    printf("%s\n", pq->head->next->answer);
-    printf("%d\n", pq->head->next->timesWrong);
-    printf("%s\n", pq->head->next->next->question);
-    printf("%s\n", pq->head->next->next->answer);
-    printf("%d\n", pq->head->next->next->timesWrong);
+    while(input != 5) {
+        printf("%s\n", getQuestion(pq));
+        prtAnswers(pq);
+        printf("Your answer: ");
+        scanf("%d", &input);
+        if(checkAnswer(pq, input) == true) {
+            printf("Correct!\n");
+        } else {
+            printf("Incorrect.\n");
+            pq->head->timesWrong += 1;
+        }
+        //if timesWrong is -1, remove from pq
+        //else, remove from pq and reinsert back into list at correct spot
+    }
+    printf("exiting program...\n");
+
     return 0;
 }
