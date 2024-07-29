@@ -2,7 +2,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <strings.h>
+#include <string.h>
 
 #include "pqueue.h"
 
@@ -117,8 +117,11 @@ void prtAnswers(PriorityQueue *pq) {
     char *second = pq->head->next->answer;
     char *third = pq->head->next->next->answer;
     char *fourth = pq->head->next->next->next->answer;
-
     //print these four strings in a random order
+
+
+    //print exit instructions
+    printf("E: exit program\n");
 }
 
 bool checkAnswer(PriorityQueue*pq, int input) {
@@ -153,7 +156,16 @@ int main(){
         printf("%s\n", getQuestion(pq));
         prtAnswers(pq);
         printf("Your answer: ");
-        scanf("%d", &input);
+
+        char charInput = '\0';
+        scanf("%c", &charInput);
+        if (charInput == 69 || charInput == 101) {
+            printf("exiting program...\n");
+            return 0;
+        }
+        //TODO: Check if charInput is a valid integar
+
+        input = charInput - 48;
         if(checkAnswer(pq, input) == true) {
             printf("Correct!\n");
         } else {
