@@ -3,15 +3,15 @@
 
 #include <stdbool.h>
 
-struct QASet{
+typedef struct QASet{
     char *question;
     char *answer;
     int timesWrong;
     struct QASet *next;
-};
+} QASet;
 
-typedef struct{
-    struct QASet *head;
+typedef struct {
+    QASet *head;
     int size;
 } PriorityQueue;
 
@@ -19,12 +19,12 @@ typedef struct{
 
 PriorityQueue* pq_create(void);
 void pq_destroy(PriorityQueue *pq);
-bool pq_insert(PriorityQueue *pq, const char *data);
-void pq_remove(PriorityQueue *pq);
 bool pq_is_empty(PriorityQueue *pq);
+bool pq_insert(PriorityQueue *pq, const char *data, int wrong);
+void pq_remove(PriorityQueue *pq);
 int pq_size(PriorityQueue *pq);
 const char* getQuestion(PriorityQueue *pq);
 void prtAnswers(PriorityQueue *pq);
-bool checkAnswer(PriorityQueue*pq, int input);
+bool checkAnswer(PriorityQueue*pq, int input, int answer);
 
 #endif // PRIORITY_QUEUE_H
