@@ -6,10 +6,13 @@ Problem: Traditional methods of study for college and high school level students
 The Quiz game will be multiple choice, prompting the user to select the right answer from 3 randomly selected options plus the correct answer. The program will also a data structure holding questions and answers based on an input file, and give the user options to add/remove elements from the graph. We will also allow the user to add their own questions to the question pool, to ensure their study is personalised for them, and their required subject of focus. We also intend to make the program as intuitive and easy to use as we can, so that the user experience is the best it can possibly be.
 
 Goals per week:
+
 Week 1:
   - Define the basic data structures and functions needed to implement the priority queue, and question asking system (GEORGE) Done!
   - Ensure the file is intuitive for users to access and use as intended (PHOENIX)
   - Create a functional priority queue (GEORGE) Done!
+
+
 Week 2:
   - Printing random answers (GEORGE) Done!
   - Shuffling quesions randomly (George)
