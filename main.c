@@ -1,12 +1,23 @@
-// REMEMBER TO ADD A NEWLINE CHAR AFTER LAST QUESTION!!!!!!
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include <time.h>
 
-#include "pqueue.h"
+#define MAX_LINE_LEN 200 //max chars in a line in the q/a set file
+#define NUM_CHOICES 4
 
-#define MAX_LINE_LEN 200
+typedef struct QASet {
+    char *question;
+    char *answer;
+    int timesWrong;
+    struct QASet *next;
+} QASet;
+
+typedef struct {
+    QASet *head;
+    int size;
+} PriorityQueue;
 
 PriorityQueue* pq_create(void) {
     PriorityQueue *pq = (PriorityQueue*)malloc(sizeof(PriorityQueue));
@@ -22,39 +33,33 @@ void pq_destroy(PriorityQueue *pq) {
     if(pq == NULL) {
         return;
     }
-    struct QASet *current = pq->head;
+    QASet *current = pq->head;
     while (current != NULL) {
-        struct QASet *temp = current;
+        QASet *temp = current;
         current = current->next;
         free(temp->question);
         free(temp->answer);
-        free(&temp->timesWrong);
-        free(temp);       // Free the node
+        free(temp);
     }
-    free(pq); // Free the priority queue structure
+    free(pq);
 }
 
 bool pq_is_empty(PriorityQueue *pq) {
     return (pq == NULL || pq->size == 0);
 }
 
-// MAKE CLEANER
-bool pq_insert(PriorityQueue *pq, const char *string) {
-    struct QASet *newNode = (struct QASet*) malloc(sizeof(struct QASet));
+bool pq_insert(PriorityQueue *pq, const char *string, int wrong) {
+    QASet *newNode = (QASet*) malloc(sizeof(QASet));
     if(newNode == NULL) {
         return false;
     }
 
     int questionLen = 0;
-    while(string[questionLen] != '|'){
+    while(string[questionLen] != '|' && string[questionLen] != '\0'){
         questionLen ++;
     }
 
-    int answerLen = questionLen;
-    while(string[answerLen] != '\0'){
-        answerLen ++;
-    }
-    answerLen = strlen(string) - questionLen;
+    int answerLen = strlen(string) - questionLen - 1;
 
     char onlyQuestion[questionLen + 1];
     char onlyAnswer[answerLen + 1];
@@ -63,45 +68,43 @@ bool pq_insert(PriorityQueue *pq, const char *string) {
     onlyQuestion[questionLen] = '\0';
 
     strncpy(onlyAnswer, string + questionLen + 1, answerLen);
-    onlyAnswer[answerLen - 2] = '\0';
+    onlyAnswer[answerLen] = '\0';
 
     newNode->question = strdup(onlyQuestion);
     newNode->answer = strdup(onlyAnswer);
-    newNode->timesWrong = 0;
+    newNode->timesWrong = wrong;
     newNode->next = NULL;
 
     if(pq->head == NULL) {
         pq->head = newNode;
-        pq->size += 1;
-        return true;
     } else {
-        struct QASet *prev = NULL;
-        struct QASet *current = pq->head;
+        QASet *prev = NULL;
+        QASet *current = pq->head;
         while(current != NULL && current->timesWrong >= newNode->timesWrong) {
             prev = current;
             current = current->next;
         }
         newNode->next = current;
-        prev->next = newNode;
-        pq->size += 1;
-        return true;
+        if(prev == NULL) {
+            pq->head = newNode;
+        } else {
+            prev->next = newNode;
+        }
     }
+    pq->size += 1;
+    return true;
 }
 
 void pq_remove(PriorityQueue *pq) {
-    struct QASet *old_head = pq->head;
+    if(pq->head == NULL) {
+        return;
+    }
+    QASet *old_head = pq->head;
     pq->head = pq->head->next;
-    char *tempQuestion = old_head->question;
-    char *tempAnswer = old_head->answer;
-    int tempWrong = old_head->timesWrong;
-    
-    free(tempQuestion);
-    free(tempAnswer);
-    //free(tempWrong);
+    free(old_head->question);
+    free(old_head->answer);
     free(old_head);
     pq->size -= 1;
-
-    return;
 }
 
 int pq_size(PriorityQueue *pq) {
@@ -109,73 +112,114 @@ int pq_size(PriorityQueue *pq) {
 }
 
 const char* getQuestion(PriorityQueue *pq) {
-    return pq->head->question;
+    return pq->head ? pq->head->question : "No more questions.";
 }
 
-void prtAnswers(PriorityQueue *pq) {
-    char *first = pq->head->answer;
-    char *second = pq->head->next->answer;
-    char *third = pq->head->next->next->answer;
-    char *fourth = pq->head->next->next->next->answer;
-    //print these four strings in a random order
+void shuffleAnswers(QASet **answers, int count) {
+    if (count <= 1) return;
 
-
-    //print exit instructions
-    printf("E: exit program\n");
+    for (int i = count - 1; i > 0; i--) {
+        int j = rand() % (i + 1);
+        QASet *temp = answers[i];
+        answers[i] = answers[j];
+        answers[j] = temp;
+    }
 }
 
-bool checkAnswer(PriorityQueue*pq, int input) {
-    return true;
+void prtAnswers(QASet *answers[], int count) {
+    for (int i = 0; i < count; i++) {
+        printf("%d: %s", i + 1, answers[i]->answer);
+    }
+    printf("E: exit program\n\n");
 }
 
-int main(){
-    int input = 0;
+bool checkAnswer(QASet *answers[], int correctIndex, int input) {
+    return strcmp(answers[input - 1]->answer, answers[correctIndex]->answer) == 0;
+}
 
+int main() {
     PriorityQueue *pq = pq_create();
     if(pq == NULL) {
         fprintf(stderr, "Failed to create priority queue\n");
         return 1;
     }
 
-    FILE *file;
-    char ch;
-    char line[MAX_LINE_LEN];
-
-    file = fopen("questions.txt", "r");
-
+    FILE *file = fopen("questions.txt", "r");
     if(file == NULL) {
         printf("Could not open file\n");
         return 1;
     }
     
+    char line[MAX_LINE_LEN];
     while(fgets(line, sizeof(line), file)) {
-        pq_insert(pq, line);
+        pq_insert(pq, line, 0);
     }
-    
-    while(input != 5) {
+    fclose(file);
+
+    srand(time(NULL)); //random number generation
+
+    while(!pq_is_empty(pq)) {
         printf("%s\n", getQuestion(pq));
-        prtAnswers(pq);
-        printf("Your answer: ");
 
-        char charInput = '\0';
-        scanf("%c", &charInput);
-        if (charInput == 69 || charInput == 101) {
-            printf("exiting program...\n");
-            return 0;
+        QASet *answers[NUM_CHOICES];
+        QASet *current = pq->head;
+        for (int i = 0; i < NUM_CHOICES && current != NULL; i++) {
+            answers[i] = current;
+            current = current->next;
         }
-        //TODO: Check if charInput is a valid integar
 
-        input = charInput - 48;
-        if(checkAnswer(pq, input) == true) {
+        shuffleAnswers(answers, NUM_CHOICES);
+
+        // Find the index of the correct answer in the shuffled array
+        int correctIndex = -1;
+        for (int i = 0; i < NUM_CHOICES; i++) {
+            if (strcmp(answers[i]->answer, pq->head->answer) == 0) {
+                correctIndex = i;
+                break;
+            }
+        }
+
+        prtAnswers(answers, NUM_CHOICES);
+
+        printf("Your answer: ");
+        
+        char charInput = '\0';
+        scanf(" %c", &charInput);
+        if (charInput == 'E' || charInput == 'e') {
+            printf("Exiting program...('e' pressed)\n");
+            break;
+        }
+
+        int input = charInput - '0';
+        if (input < 1 || input > NUM_CHOICES) {
+            printf("Invalid choice. Please enter a number between 1 and %d.\n", NUM_CHOICES);
+            continue;
+        }
+
+        if (checkAnswer(answers, correctIndex, input)) {  // Use the correct index
+            system("clear");
             printf("Correct!\n");
+            pq->head->timesWrong -= 1;
         } else {
+            system("clear");
             printf("Incorrect.\n");
             pq->head->timesWrong += 1;
         }
-        //if timesWrong is -1, remove from pq
-        //else, remove from pq and reinsert back into list at correct spot
-    }
-    printf("exiting program...\n");
 
+        if(pq->head->timesWrong < 0) {
+            pq_remove(pq);
+        } else {
+            char toInsert[MAX_LINE_LEN];
+            snprintf(toInsert, sizeof(toInsert), "%s|%s", pq->head->question, pq->head->answer);
+
+            int wrong = pq->head->timesWrong;
+            pq_remove(pq);
+            pq_insert(pq, toInsert, wrong);
+        }
+    }
+
+    printf("Exiting program...(no more questions!)\n");
+    pq_destroy(pq);
     return 0;
 }
+
