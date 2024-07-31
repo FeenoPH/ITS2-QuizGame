@@ -7,6 +7,9 @@ The Quiz game will be multiple choice, prompting the user to select the right an
 
 Goals per week:
 Week 1:
-  - Define the basic data structures and functions needed to implement the priority queue, and question asking system (GEORGE)
+  - Define the basic data structures and functions needed to implement the priority queue, and question asking system (GEORGE) Done!
   - Ensure the file is intuitive for users to access and use as intended (PHOENIX)
-  - Create a functional priority queue (GEORGE)
+  - Create a functional priority queue (GEORGE) Done!
+Week 2:
+  - Printing random answers (GEORGE) Done!
+  - Shuffling quesions randomly (George)
