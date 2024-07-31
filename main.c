@@ -19,7 +19,7 @@ typedef struct {
     int size;
 } PriorityQueue;
 
-PriorityQueue* pq_create(void) {
+PriorityQueue* createQueue(void) {
     PriorityQueue *pq = (PriorityQueue*)malloc(sizeof(PriorityQueue));
     if(pq == NULL) {
         return NULL;
@@ -29,7 +29,7 @@ PriorityQueue* pq_create(void) {
     return pq;
 }
 
-void pq_destroy(PriorityQueue *pq) {
+void destroyQueue(PriorityQueue *pq) {
     if(pq == NULL) {
         return;
     }
@@ -44,11 +44,11 @@ void pq_destroy(PriorityQueue *pq) {
     free(pq);
 }
 
-bool pq_is_empty(PriorityQueue *pq) {
+bool isEmpty(PriorityQueue *pq) {
     return (pq == NULL || pq->size == 0);
 }
 
-bool pq_insert(PriorityQueue *pq, const char *string, int wrong) {
+bool insertQueue(PriorityQueue *pq, const char *string, int wrong) {
     QASet *newNode = (QASet*) malloc(sizeof(QASet));
     if(newNode == NULL) {
         return false;
@@ -95,7 +95,7 @@ bool pq_insert(PriorityQueue *pq, const char *string, int wrong) {
     return true;
 }
 
-void pq_remove(PriorityQueue *pq) {
+void removeQueue(PriorityQueue *pq) {
     if(pq->head == NULL) {
         return;
     }
@@ -107,7 +107,7 @@ void pq_remove(PriorityQueue *pq) {
     pq->size -= 1;
 }
 
-int pq_size(PriorityQueue *pq) {
+int getSize(PriorityQueue *pq) {
     return pq ? pq->size : 0;
 }
 
@@ -138,7 +138,7 @@ bool checkAnswer(QASet *answers[], int correctIndex, int input) {
 }
 
 int main() {
-    PriorityQueue *pq = pq_create();
+    PriorityQueue *pq = createQueue();
     if(pq == NULL) {
         fprintf(stderr, "Failed to create priority queue\n");
         return 1;
@@ -152,13 +152,13 @@ int main() {
     
     char line[MAX_LINE_LEN];
     while(fgets(line, sizeof(line), file)) {
-        pq_insert(pq, line, 0);
+        insertQueue(pq, line, 0);
     }
     fclose(file);
 
     srand(time(NULL)); //random number generation
 
-    while(!pq_is_empty(pq)) {
+    while(!isEmpty(pq)) {
         printf("%s\n", getQuestion(pq));
 
         QASet *answers[NUM_CHOICES];
@@ -207,19 +207,19 @@ int main() {
         }
 
         if(pq->head->timesWrong < 0) {
-            pq_remove(pq);
+            removeQueue(pq);
         } else {
             char toInsert[MAX_LINE_LEN];
             snprintf(toInsert, sizeof(toInsert), "%s|%s", pq->head->question, pq->head->answer);
 
             int wrong = pq->head->timesWrong;
-            pq_remove(pq);
-            pq_insert(pq, toInsert, wrong);
+            removeQueue(pq);
+            insertQueue(pq, toInsert, wrong);
         }
     }
 
     printf("Exiting program...(no more questions!)\n");
-    pq_destroy(pq);
+    destroyQueue(pq);
     return 0;
 }
 
