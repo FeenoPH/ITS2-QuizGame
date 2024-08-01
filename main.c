@@ -152,17 +152,23 @@ int main() {
     
     char line[MAX_LINE_LEN];
     while(fgets(line, sizeof(line), file)) {
-        insertQueue(pq, line, 0);
+        insertQueue(pq, line, 2); //starts on 2 timesWrong
     }
     fclose(file);
 
     srand(time(NULL)); //random number generation
 
+
+    char toInsert[MAX_LINE_LEN];
+    int wrong = -1;
+    QASet *tempHead = pq->head; //temp head in case next line inserts again at head
+    
     while(!isEmpty(pq)) {
-        printf("%s\n", getQuestion(pq));
+        printf("%s (%d to complete)\n", getQuestion(pq), pq->head->timesWrong);
 
         QASet *answers[NUM_CHOICES];
         QASet *current = pq->head;
+
         for (int i = 0; i < NUM_CHOICES && current != NULL; i++) {
             answers[i] = current;
             current = current->next;
@@ -173,7 +179,7 @@ int main() {
         // Find the index of the correct answer in the shuffled array
         int correctIndex = -1;
         for (int i = 0; i < NUM_CHOICES; i++) {
-            if (strcmp(answers[i]->answer, pq->head->answer) == 0) {
+            if (strcmp(answers[i]->answer, tempHead->answer) == 0) {
                 correctIndex = i;
                 break;
             }
@@ -184,7 +190,7 @@ int main() {
         printf("Your answer: ");
         
         char charInput = '\0';
-        scanf(" %c", &charInput);
+        scanf(" %c", &charInput); // remember space infront of %c to account for newline in input buffer
         if (charInput == 'E' || charInput == 'e') {
             printf("Exiting program...('e' pressed)\n");
             break;
@@ -196,24 +202,25 @@ int main() {
             continue;
         }
 
-        if (checkAnswer(answers, correctIndex, input)) {  // Use the correct index
-            system("clear");
+        if (checkAnswer(answers, correctIndex, input)) {  // Use the correct index (of the right answer)
+            system("clear");// same as typing "clear" into command line!
             printf("Correct!\n");
-            pq->head->timesWrong -= 1;
+            tempHead->timesWrong -= 1;
         } else {
             system("clear");
             printf("Incorrect.\n");
-            pq->head->timesWrong += 1;
+            tempHead->timesWrong += 1;
         }
 
-        if(pq->head->timesWrong < 0) {
+        if(tempHead->timesWrong <= 0) {
             removeQueue(pq);
+            tempHead = pq->head;
+            insertQueue(pq, toInsert, wrong);
         } else {
-            char toInsert[MAX_LINE_LEN];
-            snprintf(toInsert, sizeof(toInsert), "%s|%s", pq->head->question, pq->head->answer);
-
-            int wrong = pq->head->timesWrong;
+            snprintf(toInsert, sizeof(toInsert), "%s|%s", tempHead->question, tempHead->answer); //creates a string, quesion|answer (auto formatted with \0)
+            wrong = tempHead->timesWrong;
             removeQueue(pq);
+            tempHead = pq->head;
             insertQueue(pq, toInsert, wrong);
         }
     }
