@@ -161,7 +161,6 @@ int main() {
 
     char toInsert[MAX_LINE_LEN];
     int wrong = -1;
-    QASet *tempHead = pq->head; //temp head in case next line inserts again at head
     
     while(!isEmpty(pq)) {
         printf("%s (%d to complete)\n", getQuestion(pq), pq->head->timesWrong);
@@ -179,7 +178,7 @@ int main() {
         // Find the index of the correct answer in the shuffled array
         int correctIndex = -1;
         for (int i = 0; i < NUM_CHOICES; i++) {
-            if (strcmp(answers[i]->answer, tempHead->answer) == 0) {
+            if (strcmp(answers[i]->answer, pq->head->answer) == 0) {
                 correctIndex = i;
                 break;
             }
@@ -203,24 +202,22 @@ int main() {
         }
 
         if (checkAnswer(answers, correctIndex, input)) {  // Use the correct index (of the right answer)
-            system("clear");// same as typing "clear" into command line!
+            //system("clear");// same as typing "clear" into command line!
             printf("Correct!\n");
-            tempHead->timesWrong -= 1;
+            pq->head->timesWrong -= 1;
         } else {
-            system("clear");
+            //system("clear");
             printf("Incorrect.\n");
-            tempHead->timesWrong += 1;
+            pq->head->timesWrong += 1;
         }
 
-        if(tempHead->timesWrong <= 0) {
+        if(pq->head->timesWrong <= 0) {
             removeQueue(pq);
-            tempHead = pq->head;
             insertQueue(pq, toInsert, wrong);
         } else {
-            snprintf(toInsert, sizeof(toInsert), "%s|%s", tempHead->question, tempHead->answer); //creates a string, quesion|answer (auto formatted with \0)
-            wrong = tempHead->timesWrong;
+            snprintf(toInsert, sizeof(toInsert), "%s|%s", pq->head->question, pq->head->answer); //creates a string, quesion|answer (auto formatted with \0)
+            wrong = pq->head->timesWrong;
             removeQueue(pq);
-            tempHead = pq->head;
             insertQueue(pq, toInsert, wrong);
         }
     }
@@ -229,4 +226,5 @@ int main() {
     destroyQueue(pq);
     return 0;
 }
+
 
