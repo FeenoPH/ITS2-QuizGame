@@ -48,12 +48,11 @@ bool isEmpty(PriorityQueue *pq) {
     return (pq == NULL || pq->size == 0);
 }
 
-bool insertQueue(PriorityQueue *pq, const char *string, int wrong) {
+// NOTE: inserts into queue but -->NOT<-- at head!!!! (unless empty)
+void insertQueue(PriorityQueue *pq, const char *string, int wrong) {
     QASet *newNode = (QASet*) malloc(sizeof(QASet));
-    if(newNode == NULL) {
-        return false;
-    }
 
+    // get the length of both quesion and answer
     int questionLen = 0;
     while(string[questionLen] != '|' && string[questionLen] != '\0'){
         questionLen ++;
@@ -75,24 +74,24 @@ bool insertQueue(PriorityQueue *pq, const char *string, int wrong) {
     newNode->timesWrong = wrong;
     newNode->next = NULL;
 
-    if(pq->head == NULL) {
+    if(pq->head == NULL) { // if the queue is empty
         pq->head = newNode;
+    } else if(pq->head->next == NULL) { // if there is one node in the queue(to prevent repeat quesions when there are 2 quesions left)
+        pq->head->next = newNode;
     } else {
-        QASet *prev = NULL;
         QASet *current = pq->head;
-        while(current != NULL && current->timesWrong >= newNode->timesWrong) {
-            prev = current;
+        while(newNode->timesWrong <= current->timesWrong && current->next != NULL) {
             current = current->next;
         }
-        newNode->next = current;
-        if(prev == NULL) {
-            pq->head = newNode;
-        } else {
-            prev->next = newNode;
+        if(current->next != NULL){
+            if(current->next->next != NULL) {
+                newNode->next = current->next->next;
+            }
         }
+        current->next = newNode;
     }
     pq->size += 1;
-    return true;
+    return;
 }
 
 void removeQueue(PriorityQueue *pq) {
@@ -184,36 +183,39 @@ int main() {
             }
         }
 
-        prtAnswers(answers, NUM_CHOICES);
-
+        if(pq->size >= 4) {
+            prtAnswers(answers, NUM_CHOICES);
+        } else {
+            prtAnswers(answers, pq->size);
+        }
         printf("Your answer: ");
         
         char charInput = '\0';
         scanf(" %c", &charInput); // remember space infront of %c to account for newline in input buffer
-        if (charInput == 'E' || charInput == 'e') {
+        if(charInput == 'E' || charInput == 'e') {
             printf("Exiting program...('e' pressed)\n");
             break;
         }
 
         int input = charInput - '0';
-        if (input < 1 || input > NUM_CHOICES) {
-            printf("Invalid choice. Please enter a number between 1 and %d.\n", NUM_CHOICES);
+        if(input < 1 || input > NUM_CHOICES || input > pq->size) {
+            printf("Invalid choice. Please enter a valid option");
             continue;
         }
 
-        if (checkAnswer(answers, correctIndex, input)) {  // Use the correct index (of the right answer)
-            //system("clear");// same as typing "clear" into command line!
+        if(checkAnswer(answers, correctIndex, input)) {  // Use the correct index (of the right answer)
+            system("clear");// same as typing "clear" into command line!
             printf("Correct!\n");
             pq->head->timesWrong -= 1;
         } else {
-            //system("clear");
+            system("clear");
             printf("Incorrect.\n");
             pq->head->timesWrong += 1;
         }
 
         if(pq->head->timesWrong <= 0) {
             removeQueue(pq);
-            insertQueue(pq, toInsert, wrong);
+            pq->size--; 
         } else {
             snprintf(toInsert, sizeof(toInsert), "%s|%s", pq->head->question, pq->head->answer); //creates a string, quesion|answer (auto formatted with \0)
             wrong = pq->head->timesWrong;
