@@ -15,4 +15,9 @@ Week 1:
 
 Week 2:
   - Printing random answers (GEORGE) Done!
-  - Shuffling quesions randomly (George)
+  - Shuffling quesions randomly (George) Done!!!!!! FINALLY
+
+
+Week 3:
+  - task 1
+  - task 2
