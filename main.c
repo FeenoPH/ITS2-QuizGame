@@ -58,7 +58,7 @@ void insertQueue(PriorityQueue *pq, const char *string, int wrong) {
 
     // get the length of both question and answer
     int questionLen = 0;
-    while (string[questionLen] != '|' && string[questionLen] != '\0') {
+    while(string[questionLen] != '|' && string[questionLen] != '\0') {
         questionLen++;
     }
 
@@ -78,12 +78,13 @@ void insertQueue(PriorityQueue *pq, const char *string, int wrong) {
     newNode->timesWrong = wrong;
     newNode->next = NULL;
 
-    if (pq->head == NULL || pq->head->timesWrong > wrong) { // Insert at the head if empty or wrong is less than the head's wrong count
-        newNode->next = pq->head;
+    if(pq->head == NULL) {
         pq->head = newNode;
+    } else if(pq->head->next == NULL) {
+        pq->head->next = newNode;
     } else {
         QASet *current = pq->head;
-        while (current->next != NULL && current->next->timesWrong <= wrong) {
+        while(current->next != NULL && newNode->timesWrong > current->next->timesWrong) {
             current = current->next;
         }
         newNode->next = current->next;
@@ -156,7 +157,7 @@ int main() {
     
     char line[MAX_LINE_LEN];
     while(fgets(line, sizeof(line), file)) {
-        insertQueue(pq, line, 0); //starts on 2 timesWrong
+        insertQueue(pq, line, 2); //starts on 2 timesWrong
     }
     fclose(file);
 
@@ -169,28 +170,30 @@ int main() {
     while(!isEmpty(pq)) {
         printf("%s (%d to complete)\n", getQuestion(pq), pq->head->timesWrong);
 
-        //the error here is it's always trying to force num_choices into everything, meaning everything breaks once the queue is less than 4 nodes long.
-        //maybe replace all num_choices with pq->size/getsize(pq), and in the functions themselves, add a condition if the input is greater than 4 to set to 4
-        QASet *answers[NUM_CHOICES];
+        int realNUM_CHOICES = pq->size;
+        if(realNUM_CHOICES >= 4) {
+            realNUM_CHOICES = NUM_CHOICES;
+        }
+        QASet *answers[realNUM_CHOICES];
         QASet *current = pq->head;
 
-        for (int i = 0; i < NUM_CHOICES && current != NULL; i++) {
+        for(int i = 0; i < realNUM_CHOICES && current != NULL; i++) {
             answers[i] = current;
             current = current->next;
         }
 
-        shuffleAnswers(answers, NUM_CHOICES);
+        shuffleAnswers(answers, realNUM_CHOICES);
 
         // Find the index of the correct answer in the shuffled array
         int correctIndex = -1;
-        for (int i = 0; i < NUM_CHOICES; i++) {
-            if (strcmp(answers[i]->answer, pq->head->answer) == 0) {
+        for(int i = 0; i < realNUM_CHOICES; i++) {
+            if(strcmp(answers[i]->answer, pq->head->answer) == 0) {
                 correctIndex = i;
                 break;
             }
         }
         
-        prtAnswers(answers, NUM_CHOICES);
+        prtAnswers(answers, realNUM_CHOICES);
         printf("Your answer: ");
         
         char charInput = '\0';
@@ -201,12 +204,12 @@ int main() {
         }
 
         int input = charInput - '0';
-        if(input < 1 || input > NUM_CHOICES || input > pq->size) {
+        if(input < 1 || input > realNUM_CHOICES || input > pq->size) {
             printf("Invalid choice. Please enter a valid option");
             continue;
         }
 
-        if(checkAnswer(answers, correctIndex, input)) {  // Use the correct index (of the right answer)
+        if(checkAnswer(answers, correctIndex, input)) {
             system("clear");// same as typing "clear" into command line!
             printf("Correct!\n");
             pq->head->timesWrong -= 1;
@@ -225,9 +228,10 @@ int main() {
             insertQueue(pq, toInsert, wrong);
         }
     }
-
-    printf("Exiting program...(no more questions!)\n");
-    destroyQueue(pq);
+    if(isEmpty(pq)) {
+        printf("Exiting program...(no more questions!)\n");
+    }
+    free(pq);
     return 0;
 }
 
