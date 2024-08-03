@@ -81,10 +81,10 @@ void insertQueue(PriorityQueue *pq, const char *string, int wrong) {
     if(pq->head == NULL) {
         pq->head = newNode;
     } else if(pq->head->next == NULL) {
-        pq->head->next = newNode;
+        pq->head->next = newNode;// prevent repeats when there are only 2 nodes in the queue
     } else {
         QASet *current = pq->head;
-        while(current->next != NULL && newNode->timesWrong > current->next->timesWrong) {
+        while(current->next != NULL && newNode->timesWrong < current->next->timesWrong) {
             current = current->next;
         }
         newNode->next = current->next;
