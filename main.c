@@ -42,20 +42,24 @@ void destroyQueue(PriorityQueue *pq) {
         free(temp);
     }
     free(pq);
+    return;
 }
 
 bool isEmpty(PriorityQueue *pq) {
     return (pq == NULL || pq->size == 0);
 }
 
-// NOTE: inserts into queue but -->NOT<-- at head!!!! (unless empty)
 void insertQueue(PriorityQueue *pq, const char *string, int wrong) {
     QASet *newNode = (QASet*) malloc(sizeof(QASet));
+    if (newNode == NULL) {
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(1);
+    }
 
-    // get the length of both quesion and answer
+    // get the length of both question and answer
     int questionLen = 0;
-    while(string[questionLen] != '|' && string[questionLen] != '\0'){
-        questionLen ++;
+    while (string[questionLen] != '|' && string[questionLen] != '\0') {
+        questionLen++;
     }
 
     int answerLen = strlen(string) - questionLen - 1;
@@ -74,35 +78,36 @@ void insertQueue(PriorityQueue *pq, const char *string, int wrong) {
     newNode->timesWrong = wrong;
     newNode->next = NULL;
 
-    if(pq->head == NULL) { // if the queue is empty
+    if (pq->head == NULL || pq->head->timesWrong > wrong) { // Insert at the head if empty or wrong is less than the head's wrong count
+        newNode->next = pq->head;
         pq->head = newNode;
-    } else if(pq->head->next == NULL) { // if there is one node in the queue(to prevent repeat quesions when there are 2 quesions left)
-        pq->head->next = newNode;
     } else {
         QASet *current = pq->head;
-        while(newNode->timesWrong <= current->timesWrong && current->next != NULL) {
+        while (current->next != NULL && current->next->timesWrong <= wrong) {
             current = current->next;
         }
-        if(current->next != NULL){
-            if(current->next->next != NULL) {
-                newNode->next = current->next->next;
-            }
-        }
+        newNode->next = current->next;
         current->next = newNode;
     }
-    pq->size += 1;
-    return;
+    pq->size++;
 }
+
 
 void removeQueue(PriorityQueue *pq) {
     if(pq->head == NULL) {
         return;
     }
-    QASet *old_head = pq->head;
-    pq->head = pq->head->next;
-    free(old_head->question);
-    free(old_head->answer);
-    free(old_head);
+    if(pq->size == 1){
+        free(pq->head->question);
+        free(pq->head->answer);
+        free(pq->head);
+    } else {
+        QASet *old_head = pq->head;
+        pq->head = pq->head->next;
+        free(old_head->question);
+        free(old_head->answer);
+        free(old_head);
+    }
     pq->size -= 1;
 }
 
@@ -151,7 +156,7 @@ int main() {
     
     char line[MAX_LINE_LEN];
     while(fgets(line, sizeof(line), file)) {
-        insertQueue(pq, line, 2); //starts on 2 timesWrong
+        insertQueue(pq, line, 0); //starts on 2 timesWrong
     }
     fclose(file);
 
@@ -164,6 +169,8 @@ int main() {
     while(!isEmpty(pq)) {
         printf("%s (%d to complete)\n", getQuestion(pq), pq->head->timesWrong);
 
+        //the error here is it's always trying to force num_choices into everything, meaning everything breaks once the queue is less than 4 nodes long.
+        //maybe replace all num_choices with pq->size/getsize(pq), and in the functions themselves, add a condition if the input is greater than 4 to set to 4
         QASet *answers[NUM_CHOICES];
         QASet *current = pq->head;
 
@@ -182,12 +189,8 @@ int main() {
                 break;
             }
         }
-
-        if(pq->size >= 4) {
-            prtAnswers(answers, NUM_CHOICES);
-        } else {
-            prtAnswers(answers, pq->size);
-        }
+        
+        prtAnswers(answers, NUM_CHOICES);
         printf("Your answer: ");
         
         char charInput = '\0';
@@ -215,7 +218,6 @@ int main() {
 
         if(pq->head->timesWrong <= 0) {
             removeQueue(pq);
-            pq->size--; 
         } else {
             snprintf(toInsert, sizeof(toInsert), "%s|%s", pq->head->question, pq->head->answer); //creates a string, quesion|answer (auto formatted with \0)
             wrong = pq->head->timesWrong;
