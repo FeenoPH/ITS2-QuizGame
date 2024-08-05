@@ -21,3 +21,9 @@ Week 2:
 Week 3:
   - task 1
   - task 2
+
+
+
+
+TODO:
+edit insert function to reset high timesWrong values back down to 2ish? so you don't have to get something right 12 times in a row to complete'
