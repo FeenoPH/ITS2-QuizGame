@@ -15,7 +15,7 @@ Week 1:
 
 Week 2:
   - Printing random answers (GEORGE) Done!
-  - Shuffling quesions randomly (George) Done!!!!!! FINALLY
+  - prioritising wrong quesions (George) Done!!!!!! FINALLY
 
 
 Week 3:
