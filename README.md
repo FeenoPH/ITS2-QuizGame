@@ -19,15 +19,16 @@ Week 2:
 
 
 Week 3:
-  - Point/Scoring system
-  - Timing system
+  - Point/Scoring system (GEORGE)
+  - Timing system (PHOENIX)\
+  - insert function to reset high timesWrong values back down to 2ish? so you don't have to get something right 12 times in a row to complete (PHOENIX)
 
 
 Week 4:
-  - Adding own questions
-  - insert function to reset high timesWrong values back down to 2ish? so you don't have to get something right 12 times in a row to complete
+  - Appending new question to current document + inserting into queue (GEORGE)
+  - Selecting different questionsets (PHOENIX)
 
 
 Week 5: 
-  - Polishing/finding any bugs
-  - finishing implentation of any half-done features
+  - Polishing/finding any bugs (BOTH)
+  - finishing implentation of any half-done features (BOTH)
