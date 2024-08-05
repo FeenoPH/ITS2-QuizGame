@@ -9,7 +9,7 @@ Goals per week:
 
 Week 1:
   - Define the basic data structures and functions needed to implement the priority queue, and question asking system (GEORGE) Done!
-  - Ensure the file is intuitive for users to access and use as intended (PHOENIX)
+  - Ensure the file is intuitive for users to access and use as intended, can be easily opened and exited, etc. (PHOENIX) Done!
   - Create a functional priority queue (GEORGE) Done!
 
 
