@@ -102,6 +102,7 @@ void removeQueue(PriorityQueue *pq) {
         free(pq->head->question);
         free(pq->head->answer);
         free(pq->head);
+        pq->head = NULL;
     } else {
         QASet *old_head = pq->head;
         pq->head = pq->head->next;
@@ -166,6 +167,8 @@ int main() {
 
     char toInsert[MAX_LINE_LEN];
     int wrong = -1;
+    int finalRight = 0;
+    int finalWrong = 0;
     
     while(!isEmpty(pq)) {
         printf("%s (%d to complete)\n", getQuestion(pq), pq->head->timesWrong);
@@ -200,6 +203,7 @@ int main() {
         scanf(" %c", &charInput); // remember space infront of %c to account for newline in input buffer
         if(charInput == 'E' || charInput == 'e') {
             printf("Exiting program...('e' pressed)\n");
+            system("clear");
             break;
         }
 
@@ -213,10 +217,12 @@ int main() {
             system("clear");// same as typing "clear" into command line!
             printf("Correct!\n");
             pq->head->timesWrong -= 1;
+            finalRight++;
         } else {
             system("clear");
             printf("Incorrect.\n");
             pq->head->timesWrong += 1;
+            finalWrong++;
         }
 
         if(pq->head->timesWrong <= 0) {
@@ -231,8 +237,8 @@ int main() {
     if(isEmpty(pq)) {
         printf("Exiting program...(no more questions!)\n");
     }
+    float percentage = finalRight * 100.0/(finalWrong+finalRight);
+    printf("you got %d questions wrong, and %d right. you had a %0.2f%% success rate!\n", finalWrong, finalRight, percentage);
     free(pq);
     return 0;
 }
-
-
