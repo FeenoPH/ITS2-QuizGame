@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <unistd.h>
 #include <time.h>
 
 #define MAX_LINE_LEN 200 //max chars in a line in the q/a set file
@@ -144,6 +145,7 @@ bool checkAnswer(QASet *answers[], int correctIndex, int input) {
 }
 
 int main() {
+    time_t startTime = time(NULL);
     PriorityQueue *pq = createQueue();
     if(pq == NULL) {
         fprintf(stderr, "Failed to create priority queue\n");
@@ -221,7 +223,9 @@ int main() {
         } else {
             system("clear");
             printf("Incorrect.\n");
-            pq->head->timesWrong += 1;
+            if (pq->head->timesWrong <= 3) {
+                pq->head->timesWrong += 1;
+            }
             finalWrong++;
         }
 
@@ -237,8 +241,25 @@ int main() {
     if(isEmpty(pq)) {
         printf("Exiting program...(no more questions!)\n");
     }
+    time_t endTime = time(NULL);
+    int secondsElapsed = difftime(endTime, startTime);
+    int hoursTotal = (secondsElapsed/3600); 
+    int minutesTotal = (secondsElapsed -(3600*hoursTotal))/60;
+    int secondsTotal = (secondsElapsed -(3600*hoursTotal)-(minutesTotal*60));
+
     float percentage = finalRight * 100.0/(finalWrong+finalRight);
-    printf("you got %d questions wrong, and %d right. you had a %0.2f%% success rate!\n", finalWrong, finalRight, percentage);
+    printf("You got %d questions wrong, and %d right. you had a %0.2f%% success rate!\n", finalWrong, finalRight, percentage);
+    printf("The total time to complete was %d:%d:%d.\n", hoursTotal, minutesTotal, secondsTotal);
+    printf("Please enter 'E' to exit the program: ");
+
+    char charInput = '\0';
+    scanf(" %c", &charInput); // remember space infront of %c to account for newline in input buffer
+    if(charInput == 'E' || charInput == 'e') {
+        printf("Exiting program...\n");
+        sleep(1);
+        system("clear");
+    }
+    
     free(pq);
     return 0;
 }

@@ -5,4 +5,6 @@ What is the capital city of Queensland?|Brisbane
 What is the capital city of New Zealand?|Wellington
 What is the capital city of Taiwan?|Taipei
 What part of Australia was previously refered to as Van Diemen's Land?|Tasmania
-test|test
+What is Japan's oldest city?|Fukuoka
+What is the capital city of Japan?|Tokyo
+What is Australia's second largest state?|Queensland
