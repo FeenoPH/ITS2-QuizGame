@@ -20,8 +20,8 @@ Week 2:
 
 Week 3:
   - Point/Scoring system (GEORGE)
-  - Timing system (PHOENIX)\
-  - insert function to reset high timesWrong values back down to 2ish? so you don't have to get something right 12 times in a row to complete (PHOENIX)
+  - Timing system (PHOENIX) Done!
+  - insert function to reset high timesWrong values back down to 2ish? so you don't have to get something right 12 times in a row to complete (PHOENIX) Done!
 
 
 Week 4:
