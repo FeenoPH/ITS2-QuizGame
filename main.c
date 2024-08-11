@@ -8,6 +8,12 @@
 #define MAX_LINE_LEN 200 //max chars in a line in the q/a set file
 #define NUM_CHOICES 4
 
+//maybe hard code these in later, I just put them here to make it easier to calibrate
+#define TIME_WEIGHTING 10
+#define PERCENTAGE_WEIGHTING 10
+#define CORRECT_WEIGHTING 50
+#define INCORRECT_PENALTY 100
+
 typedef struct QASet {
     char *question;
     char *answer;
@@ -137,7 +143,7 @@ void prtAnswers(QASet *answers[], int count) {
     for (int i = 0; i < count; i++) {
         printf("%d: %s", i + 1, answers[i]->answer);
     }
-    printf("E: exit program\n\n");
+    printf("e: Exit to score breakdown\n\n");
 }
 
 bool checkAnswer(QASet *answers[], int correctIndex, int input) {
@@ -157,7 +163,13 @@ int main() {
         printf("Could not open file\n");
         return 1;
     }
-    
+
+    FILE *highscores = fopen("highscores.txt", "a");
+    if(highscores == NULL) {
+        printf("Could not open file\n");
+        return 1;
+    }
+
     char line[MAX_LINE_LEN];
     while(fgets(line, sizeof(line), file)) {
         insertQueue(pq, line, 2); //starts on 2 timesWrong
@@ -246,18 +258,37 @@ int main() {
     int hoursTotal = (secondsElapsed/3600); 
     int minutesTotal = (secondsElapsed -(3600*hoursTotal))/60;
     int secondsTotal = (secondsElapsed -(3600*hoursTotal)-(minutesTotal*60));
-
     float percentage = finalRight * 100.0/(finalWrong+finalRight);
-    printf("You got %d questions wrong, and %d right. you had a %0.2f%% success rate!\n", finalWrong, finalRight, percentage);
-    printf("The total time to complete was %d:%d:%d.\n", hoursTotal, minutesTotal, secondsTotal);
-    printf("Please enter 'E' to exit the program: ");
+    float score = (percentage*(TIME_WEIGHTING/secondsElapsed)) + (percentage*PERCENTAGE_WEIGHTING) + (finalRight*CORRECT_WEIGHTING) - (finalWrong*INCORRECT_PENALTY);
+    if(score < 0) {
+        score = 0;
+    }
 
-    char charInput = '\0';
-    scanf(" %c", &charInput); // remember space infront of %c to account for newline in input buffer
-    if(charInput == 'E' || charInput == 'e') {
-        printf("Exiting program...\n");
-        sleep(1);
-        system("clear");
+    if(finalRight + finalWrong != 0) {
+        printf("You got %d questions wrong, and %d right. you had a %0.2f%% success rate!\n", finalWrong, finalRight, percentage);
+        printf("The total time to complete was %d h:%d m:%d s.\n", hoursTotal, minutesTotal, secondsTotal);
+        printf("Your score was: %.0f (Position #NUMBER)\n", score); // add position here
+        printf("Please enter 'e' to exit the program, or 'h' to view the leaderboard: ");
+    } else {
+        printf("You didn't even attempt the quiz smh...\n");
+        printf("Your total time to let everyone down was: %d h:%d m:%d s.\n", hoursTotal, minutesTotal, secondsTotal);
+        printf("Please enter 'e' to exit the program you disappointment: ");
+    }
+
+    fprintf(highscores, "%f\n", score);
+
+    char exitOrHigh = '\0';
+    
+    while(exitOrHigh != 'E' && exitOrHigh != 'e') {
+        scanf(" %c", &exitOrHigh); // remember space infront of %c to account for newline in input buffer
+        if(exitOrHigh == 'E' || exitOrHigh == 'e') {
+            printf("Exiting program...\n");
+            sleep(1);
+            system("clear");
+        } else if(exitOrHigh == 'H' || exitOrHigh == 'h') {
+            // show highscores here!
+            printf("gonna be a highscore table here soon enough lol\n");
+        }
     }
     
     free(pq);
