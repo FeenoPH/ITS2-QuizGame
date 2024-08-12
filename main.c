@@ -164,12 +164,6 @@ int main() {
         return 1;
     }
 
-    FILE *highscores = fopen("highscores.txt", "a");
-    if(highscores == NULL) {
-        printf("Could not open file\n");
-        return 1;
-    }
-
     char line[MAX_LINE_LEN];
     while(fgets(line, sizeof(line), file)) {
         insertQueue(pq, line, 2); //starts on 2 timesWrong
@@ -264,6 +258,27 @@ int main() {
         score = 0;
     }
 
+    FILE *highscores = fopen("highscores.txt", "a");
+    if(highscores == NULL) {
+        printf("Could not open file\n");
+        return 1;
+    }
+
+    fprintf(highscores, "%f\n", score);
+
+    // create a new queue/array here to store all the scores
+    
+    //next insert into queue/array using something like this:
+    // while(fgets(line, sizeof(line), file)) { // remember this terminates reading whenever it gets to a newline character
+    //     insertQueue(pq, line, 2); //starts on 2 timesWrong
+    // }
+
+    // following that, use your knowledge from s1 to sort it into order the most efficient way!
+
+    // finally, search for the inserted score in thed queue/array and assign the position to be the index where it is
+
+    fclose(highscores);
+
     if(finalRight + finalWrong != 0) {
         printf("You got %d questions wrong, and %d right. you had a %0.2f%% success rate!\n", finalWrong, finalRight, percentage);
         printf("The total time to complete was %d h:%d m:%d s.\n", hoursTotal, minutesTotal, secondsTotal);
@@ -275,8 +290,6 @@ int main() {
         printf("Please enter 'e' to exit the program you disappointment: ");
     }
 
-    fprintf(highscores, "%f\n", score);
-
     char exitOrHigh = '\0';
     
     while(exitOrHigh != 'E' && exitOrHigh != 'e') {
@@ -287,6 +300,7 @@ int main() {
             system("clear");
         } else if(exitOrHigh == 'H' || exitOrHigh == 'h') {
             // show highscores here!
+            // print the top 10(?) values in the sorted array/queue after each other
             printf("gonna be a highscore table here soon enough lol\n");
         }
     }
