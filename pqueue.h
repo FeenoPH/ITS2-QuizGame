@@ -15,16 +15,27 @@ typedef struct {
     int size;
 } PriorityQueue;
 
-// NEW FUNCTIONS TO ADD: random 4 questions (inc. correct one), peek at top node
+typedef struct scoreNode {
+    float value;
+    struct scoreNode *next;
+} scoreNode;
+
+typedef struct {
+    scoreNode *head;
+    int size;
+} highscoreQueue;
 
 PriorityQueue* createQueue(void);
+highscoreQueue* createScoreQueue(void);
+void destroyScoreQueue(highscoreQueue *scoreQueue);
 void destroyQueue(PriorityQueue *pq);
 bool isEmpty(PriorityQueue *pq);
 bool insertQueue(PriorityQueue *pq, const char *data, int wrong);
 void removeQueue(PriorityQueue *pq);
-int getSize(PriorityQueue *pq);
 const char* getQuestion(PriorityQueue *pq);
+void shuffleAnswers(QASet **answers, int count);
 void prtAnswers(PriorityQueue *pq);
 bool checkAnswer(PriorityQueue*pq, int input, int answer);
+void insertHighScoreQueue(highscoreQueue *scoreQueue, int value);
 
 #endif // PRIORITY_QUEUE_H
