@@ -26,6 +26,16 @@ typedef struct {
     int size;
 } PriorityQueue;
 
+typedef struct scoreNode {
+    int value;
+    struct scoreNode *next;
+} scoreNode;
+
+typedef struct {
+    scoreNode *head;
+    int size;
+} highscoreQueue;
+
 PriorityQueue* createQueue(void) {
     PriorityQueue *pq = (PriorityQueue*)malloc(sizeof(PriorityQueue));
     if(pq == NULL) {
@@ -34,6 +44,30 @@ PriorityQueue* createQueue(void) {
     pq->head = NULL;
     pq->size = 0;
     return pq;
+}
+
+highscoreQueue* createScoreQueue(void) {
+    highscoreQueue *scoreQueue = (highscoreQueue*)malloc(sizeof(highscoreQueue));
+    if(scoreQueue == NULL) {
+        return NULL;
+    }
+    scoreQueue->head = NULL;
+    scoreQueue->size = 0;
+    return scoreQueue;
+}
+
+void destroyScoreQueue(highscoreQueue *scoreQueue) {
+    if(scoreQueue == NULL) {
+        return;
+    }
+    scoreNode *current = scoreQueue->head;
+    while (current != NULL) {
+        scoreNode *temp = current;
+        current = current->next;
+        free(temp);
+    }
+    free(scoreQueue);
+    return;
 }
 
 void destroyQueue(PriorityQueue *pq) {
@@ -150,6 +184,29 @@ bool checkAnswer(QASet *answers[], int correctIndex, int input) {
     return strcmp(answers[input - 1]->answer, answers[correctIndex]->answer) == 0;
 }
 
+// void insertHighscoreQueue(highscoreQueue *scoreQueue, int value) {
+//     scoreNode *newNode = (scoreNode*) malloc(sizeof(scoreNode));
+//     if (newNode == NULL) {
+//         fprintf(stderr, "Memory allocation failed\n");
+//         exit(1);
+//     }
+
+//     newNode->value = value;
+//     newNode->next = NULL;
+
+//     if(scoreQueue->head == NULL) {
+//         scoreQueue->head = newNode;
+//     } else {
+//         QASet *current = pq->head;
+//         while(current->next != NULL && newNode->timesWrong < current->next->timesWrong) {
+//             current = current->next;
+//         }
+//         newNode->next = current->next;
+//         current->next = newNode;
+//     }
+//     scoreQueue->size++;
+// }
+
 int main() {
     time_t startTime = time(NULL);
     PriorityQueue *pq = createQueue();
@@ -256,7 +313,7 @@ int main() {
     float score = (percentage*(TIME_WEIGHTING/secondsElapsed)) + (percentage*PERCENTAGE_WEIGHTING) + (finalRight*CORRECT_WEIGHTING) - (finalWrong*INCORRECT_PENALTY);
     if(score < 0) {
         score = 0;
-        printf("YOU ARE A DUMBASS -Dominic Maher\n");
+        printf("YOU ARE A DUMBASS -Dominic M\n");
     }
 
     FILE *highscores = fopen("highscores.txt", "a");
@@ -267,12 +324,16 @@ int main() {
 
     fprintf(highscores, "%f\n", score);
 
-    // create a new queue/array here to store all the scores
-    
-    //next insert into queue/array using something like this:
-    // while(fgets(line, sizeof(line), file)) { // remember this terminates reading whenever it gets to a newline character
-    //     insertQueue(pq, line, 2); //starts on 2 timesWrong
-    // }
+    PriorityQueue *scoreQueue = createQueue();
+    if(scoreQueue == NULL) {
+        fprintf(stderr, "Failed to create priority queue\n");
+        return 1;
+    }
+
+    while(fgets(line, sizeof(line), highscores)) { // remember this terminates reading whenever it gets to a newline character
+        insertQueue(scoreQueue, line, 0);
+    }
+    printf("the first node is: %s\n", scoreQueue->head->timesWrong);
 
     // following that, use your knowledge from s1 to sort it into order the most efficient way!
 
