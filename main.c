@@ -6,13 +6,10 @@
 #include <time.h>
 
 #define MAX_LINE_LEN 200 //max chars in a line in the q/a set file
-#define NUM_CHOICES 4
-
-//maybe hard code these in later, I just put them here to make it easier to calibrate
-#define TIME_WEIGHTING 10
-#define PERCENTAGE_WEIGHTING 10
-#define CORRECT_WEIGHTING 50
-#define INCORRECT_PENALTY 100
+#define NUM_CHOICES 4 //maybe have the ability to select "difficulties" with different number of choices?
+#define TIME_WEIGHTING 2
+#define CORRECT_WEIGHTING 100
+#define INCORRECT_PENALTY 50
 
 typedef struct QASet {
     char *question;
@@ -154,10 +151,6 @@ void removeQueue(PriorityQueue *pq) {
     pq->size -= 1;
 }
 
-int getSize(PriorityQueue *pq) {
-    return pq ? pq->size : 0;
-}
-
 const char* getQuestion(PriorityQueue *pq) {
     return pq->head ? pq->head->question : "No more questions.";
 }
@@ -201,7 +194,7 @@ void insertHighScoreQueue(highscoreQueue *scoreQueue, int value) {
         scoreQueue->head = newNode;
     } else {
         scoreNode *current = scoreQueue->head;
-        while(current->next != NULL && newNode->value < current->next->value) {
+        while(current->next != NULL && newNode->value <= current->next->value) {
             current = current->next;
         }
         newNode->next = current->next;
@@ -277,7 +270,8 @@ int main() {
 
         int input = charInput - '0';
         if(input < 1 || input > realNUM_CHOICES || input > pq->size) {
-            printf("Invalid choice. Please enter a valid option");
+            system("clear");
+            printf("Invalid choice. Please enter a valid option\n");
             continue;
         }
 
@@ -313,9 +307,15 @@ int main() {
     int minutesTotal = (secondsElapsed -(3600*hoursTotal))/60;
     int secondsTotal = (secondsElapsed -(3600*hoursTotal)-(minutesTotal*60));
     float percentage = finalRight * 100.0/(finalWrong+finalRight);
-    float score = (percentage*(TIME_WEIGHTING/secondsElapsed)) + (percentage*PERCENTAGE_WEIGHTING) + (finalRight*CORRECT_WEIGHTING) - (finalWrong*INCORRECT_PENALTY);
-    if(score < 0) {
+    
+    float score = 0;
+    if(secondsElapsed == 0 || finalRight == 0) {
         score = 0;
+    } else {
+        score = (((secondsElapsed * TIME_WEIGHTING)/finalRight) * CORRECT_WEIGHTING) + 2 * ((finalRight * CORRECT_WEIGHTING) - (finalWrong * INCORRECT_PENALTY));
+        if(score < 0) {
+            score = 0;
+        }
     }
 
     FILE *highscores = fopen("highscores.txt", "a");
@@ -325,9 +325,8 @@ int main() {
     }
 
     fprintf(highscores, "%f\n", score);
-    fclose(highscores); // Close the file after writing
+    fclose(highscores); // close and reopen in "read" mode
 
-    // Reopen the file for reading
     highscores = fopen("highscores.txt", "r");
     if(highscores == NULL) {
         printf("Could not open file\n");
@@ -358,7 +357,7 @@ int main() {
     if(finalRight + finalWrong != 0) {
         printf("You got %d questions wrong, and %d right. you had a %0.2f%% success rate!\n", finalWrong, finalRight, percentage);
         printf("The total time to complete was %d h:%d m:%d s.\n", hoursTotal, minutesTotal, secondsTotal);
-        printf("Your score was: %.0f (Position #%d)\n", score, index); // add position here
+        printf("Your score was: %.0f (Position #%d out of %d attempts)\n", score, index, scoreQueue->size); // add position here
         printf("Please enter 'e' to exit the program, or 'h' to view the leaderboard: ");
     } else {
         printf("You didn't even attempt the quiz smh...\n");
