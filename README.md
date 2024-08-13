@@ -19,13 +19,14 @@ Week 2:
 
 
 Week 3:
-  - Point/Scoring system (GEORGE) (mostly)Done!
+  - Point/Scoring system (GEORGE) Done!
   - Timing system (PHOENIX) Done!
   - insert function to reset high timesWrong values back down to 2ish? so you don't have to get something right 12 times in a row to complete (PHOENIX) Done!
 
 
 Week 4:
-  - Appending new question to current document + inserting into queue (GEORGE)
+  - Display highscores (GEORGE) Done!
+  - Appending new question to current document + inserting into queue (PHOENIX)
   - Selecting different questionsets (PHOENIX)
 
 
