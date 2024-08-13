@@ -319,7 +319,7 @@ int main() {
     }
 
     FILE *highscores = fopen("highscores.txt", "a");
-    if (highscores == NULL) {
+    if(highscores == NULL) {
         printf("Could not open file\n");
         return 1;
     }
@@ -329,31 +329,36 @@ int main() {
 
     // Reopen the file for reading
     highscores = fopen("highscores.txt", "r");
-    if (highscores == NULL) {
+    if(highscores == NULL) {
         printf("Could not open file\n");
         return 1;
     }
 
     highscoreQueue *scoreQueue = createScoreQueue();
-    if (scoreQueue == NULL) {
+    if(scoreQueue == NULL) {
         fprintf(stderr, "Failed to create priority queue\n");
         return 1;
     }
 
     float currentScore = 0;
-    while (fscanf(highscores, "%f", &currentScore) == 1) {
+    while(fscanf(highscores, "%f", &currentScore) == 1) {
         //printf("got: %f\n", currentScore);
         insertHighScoreQueue(scoreQueue, currentScore);
     }
 
     fclose(highscores);
-
-    // finally, search for the inserted score in thed queue/array and assign the position to be the index where it is
+    
+    int index = 1;
+    scoreNode *indexFinder = scoreQueue->head;
+    while(score != indexFinder->value) {
+        indexFinder = indexFinder->next;
+        index++;
+    }
 
     if(finalRight + finalWrong != 0) {
         printf("You got %d questions wrong, and %d right. you had a %0.2f%% success rate!\n", finalWrong, finalRight, percentage);
         printf("The total time to complete was %d h:%d m:%d s.\n", hoursTotal, minutesTotal, secondsTotal);
-        printf("Your score was: %.0f (Position #NUMBER)\n", score); // add position here
+        printf("Your score was: %.0f (Position #%d)\n", score, index); // add position here
         printf("Please enter 'e' to exit the program, or 'h' to view the leaderboard: ");
     } else {
         printf("You didn't even attempt the quiz smh...\n");
@@ -370,9 +375,13 @@ int main() {
             sleep(1);
             system("clear");
         } else if(exitOrHigh == 'H' || exitOrHigh == 'h') {
-            // show highscores here!
-            // print the top 10(?) values in the sorted array/queue after each other
-            printf("gonna be a highscore table here soon enough lol\n");
+            printf("\n\nTop 10 scores:\n\n");
+            scoreNode *leaderboardTraverse = scoreQueue->head;
+            for(int i = 1; i < 11; i++) {
+                printf("%d. %.0f\n", i, leaderboardTraverse->value);
+                leaderboardTraverse = leaderboardTraverse->next;
+            }
+            printf("\n\nPlease enter 'e' to exit the program, or 'h' to view the leaderboard: ");
         }
     }
     
