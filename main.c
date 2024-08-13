@@ -256,6 +256,7 @@ int main() {
     float score = (percentage*(TIME_WEIGHTING/secondsElapsed)) + (percentage*PERCENTAGE_WEIGHTING) + (finalRight*CORRECT_WEIGHTING) - (finalWrong*INCORRECT_PENALTY);
     if(score < 0) {
         score = 0;
+        printf("YOU ARE A DUMBASS -Dominic Maher\n");
     }
 
     FILE *highscores = fopen("highscores.txt", "a");
