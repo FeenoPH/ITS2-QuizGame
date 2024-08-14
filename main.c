@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <time.h>
+#include <dirent.h>
+#include <sys/types.h>
 
 #define MAX_LINE_LEN 200 //max chars in a line in the q/a set file
 #define NUM_CHOICES 4 //maybe have the ability to select "difficulties" with different number of choices?
@@ -203,7 +205,38 @@ void insertHighScoreQueue(highscoreQueue *scoreQueue, int value) {
     scoreQueue->size++;
 }
 
-int main() {
+int selectQuestionset() {
+    DIR *questionsetDirectory;
+    char *directoryName = "questionsets";
+    questionsetDirectory = opendir(directoryName);
+
+    struct dirent *dp;
+    dp = readdir(questionsetDirectory);
+    int fileNum = 1;
+    printf("Select Question Set: \n");
+    while (dp != NULL){
+        char filePath[101];
+        if (dp->d_type == DT_REG) {
+            sprintf(filePath, "%s%s", "questionsets/", dp->d_name);
+            FILE *file = fopen(filePath, "r");
+            char line[MAX_LINE_LEN];
+            fgets(line, sizeof(line), file);
+            printf("%i: %s\n", fileNum, line);
+            fclose(file);
+            fileNum++;
+        }
+        dp = readdir(questionsetDirectory);
+    }
+
+    closedir(questionsetDirectory);
+}
+
+void editQuestionsets() {
+
+}
+
+int runQuiz() {
+    selectQuestionset();
     time_t startTime = time(NULL);
     PriorityQueue *pq = createQueue();
     if(pq == NULL) {
@@ -211,7 +244,7 @@ int main() {
         return 1;
     }
 
-    FILE *file = fopen("questions.txt", "r");
+    FILE *file = fopen("questionsets/questions.txt", "r");
     if(file == NULL) {
         printf("Could not open file\n");
         return 1;
@@ -387,4 +420,31 @@ int main() {
     destroyQueue(pq);
     destroyScoreQueue(scoreQueue);
     return 0;
+}
+
+int main() {
+    printf("Welcome to the Quiz Game!\n\nPlease select the mode you wish to open the Quiz game in:\n");
+    printf("1: Play quiz\n");
+    printf("2: Edit Questionsets\n");
+    printf("E: Exit program\n");
+    char charInput = '\0';
+    scanf(" %c", &charInput); // remember space infront of %c to account for newline in input buffer
+    if(charInput == 'E' || charInput == 'e') {
+        printf("Exiting program...('e' pressed)\n");
+        sleep(1);
+        system("clear");
+        return 0;
+    }
+    else if(charInput == '1') {
+        return runQuiz();
+    }
+    else if(charInput == '2') {
+        editQuestionsets;
+        return 0;
+    }
+    else {
+        printf("Invalid Input\n");
+        return 1;
+    }
+
 }
