@@ -95,6 +95,10 @@ void insertQueue(PriorityQueue *pq, const char *string, int wrong) {
         fprintf(stderr, "Memory allocation failed\n");
         exit(1);
     }
+    // Ignore first line of file (question set title)
+    if (string[0] == '-') {
+        return;
+    }
 
     // get the length of both question and answer
     int questionLen = 0;
@@ -205,9 +209,10 @@ void insertHighScoreQueue(highscoreQueue *scoreQueue, int value) {
     scoreQueue->size++;
 }
 
-int selectQuestionset() {
+char selectQuestionset() {
     DIR *questionsetDirectory;
     char *directoryName = "questionsets";
+    int questionSetsTotal = 0;
     questionsetDirectory = opendir(directoryName);
 
     struct dirent *dp;
@@ -218,6 +223,7 @@ int selectQuestionset() {
         char filePath[101];
         if (dp->d_type == DT_REG) {
             sprintf(filePath, "%s%s", "questionsets/", dp->d_name);
+            questionSetsTotal++;
             FILE *file = fopen(filePath, "r");
             char line[MAX_LINE_LEN];
             fgets(line, sizeof(line), file);
@@ -227,8 +233,20 @@ int selectQuestionset() {
         }
         dp = readdir(questionsetDirectory);
     }
-
     closedir(questionsetDirectory);
+    printf("E: Exit Program\n");
+    printf("Your Selection: ");
+    char charInput = '\0';
+    scanf(" %c", &charInput); // remember space infront of %c to account for newline in input buffer
+    int input = charInput - '0';
+    if(input < 1 || input > questionSetsTotal) {
+        system("clear");
+        printf("Invalid choice.\n");
+        return -1;
+    }
+    else {
+        return charInput;
+    }
 }
 
 void editQuestionsets() {
@@ -236,20 +254,20 @@ void editQuestionsets() {
 }
 
 int runQuiz() {
-    selectQuestionset();
+    char qSet = selectQuestionset();
     time_t startTime = time(NULL);
     PriorityQueue *pq = createQueue();
     if(pq == NULL) {
         fprintf(stderr, "Failed to create priority queue\n");
         return 1;
     }
-
-    FILE *file = fopen("questionsets/questions.txt", "r");
+    char filePath[101];
+    sprintf(filePath, "%s%c%s", "questionsets/questions", qSet, ".txt");
+    FILE *file = fopen(filePath, "r");
     if(file == NULL) {
         printf("Could not open file\n");
         return 1;
     }
-
     char line[MAX_LINE_LEN];
     while(fgets(line, sizeof(line), file)) {
         insertQueue(pq, line, 2); //starts on 2 timesWrong
@@ -436,10 +454,10 @@ int main() {
         return 0;
     }
     else if(charInput == '1') {
-        return runQuiz();
+        runQuiz();
     }
     else if(charInput == '2') {
-        editQuestionsets;
+        editQuestionsets();
         return 0;
     }
     else {

@@ -1,0 +1,6 @@
+-Biology-
+What type of animal is a frog?|Amphibian
+What type of animal is a snake?|Reptile
+What type of animal is a dog?|Mammal
+What type of animal is a shark?|Fish
+What type of animal is a jellyfish?|Invertebrate
