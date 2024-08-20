@@ -210,43 +210,44 @@ void insertHighScoreQueue(highscoreQueue *scoreQueue, int value) {
 }
 
 char selectQuestionset() {
-    DIR *questionsetDirectory;
-    char *directoryName = "questionsets";
-    int questionSetsTotal = 0;
-    questionsetDirectory = opendir(directoryName);
+    while(true) {
+        DIR *questionsetDirectory;
+        char *directoryName = "questionsets";
+        int questionSetsTotal = 0;
+        questionsetDirectory = opendir(directoryName);
 
-    struct dirent *dp;
-    dp = readdir(questionsetDirectory);
-    int fileNum = 1;
-    printf("Select Question Set: \n");
-    while (dp != NULL){
-        char filePath[101];
-        if (dp->d_type == DT_REG) {
-            sprintf(filePath, "%s%s", "questionsets/", dp->d_name);
-            questionSetsTotal++;
-            FILE *file = fopen(filePath, "r");
-            char line[MAX_LINE_LEN];
-            fgets(line, sizeof(line), file);
-            printf("%i: %s\n", fileNum, line);
-            fclose(file);
-            fileNum++;
-        }
+
+        struct dirent *dp;
         dp = readdir(questionsetDirectory);
-    }
-    closedir(questionsetDirectory);
-    printf("E: Exit Program\n");
-    printf("Your Selection: ");
-    char charInput = '\0';
-    scanf(" %c", &charInput); // remember space infront of %c to account for newline in input buffer
-    int input = charInput - '0';
-    if(input < 1 || input > questionSetsTotal) {
-        system("clear");
-        printf("Invalid choice.\n");
-        return -1;
-    }
-    else {
-        system("clear");
-        return charInput;
+        int fileNum = 1;
+        printf("Select Question Set: \n");
+        while (dp != NULL){
+            char filePath[101];
+            if (dp->d_type == DT_REG) {
+                sprintf(filePath, "%s%s", "questionsets/", dp->d_name);
+                questionSetsTotal++;
+                FILE *file = fopen(filePath, "r");
+                char line[MAX_LINE_LEN];
+                fgets(line, sizeof(line), file);
+                printf("%i: %s\n", fileNum, line);
+                fclose(file);
+                fileNum++;
+            }
+            dp = readdir(questionsetDirectory);
+        }
+        closedir(questionsetDirectory);
+        printf("E: Return to main menu\n");
+        printf("Your Selection: ");
+        char charInput = '\0';
+        scanf(" %c", &charInput); // remember space infront of %c to account for newline in input buffer
+        int input = charInput - '0';
+        if((input < 1 || input > questionSetsTotal) && charInput != 'e' && charInput != 'E') {
+            system("clear");
+            printf("Invalid choice.\n");
+        } else {
+            system("clear");
+            return charInput;
+        }
     }
 }
 
@@ -256,6 +257,9 @@ void editQuestionsets() {
 
 int runQuiz() {
     char qSet = selectQuestionset();
+    if(qSet == 'e'|| qSet == 'E') {
+        return 0;
+    }
     time_t startTime = time(NULL);
     PriorityQueue *pq = createQueue();
     if(pq == NULL) {
@@ -410,11 +414,11 @@ int runQuiz() {
         printf("You got %d questions wrong, and %d right. you had a %0.2f%% success rate!\n", finalWrong, finalRight, percentage);
         printf("The total time to complete was %d h:%d m:%d s.\n", hoursTotal, minutesTotal, secondsTotal);
         printf("Your score was: %.0f (Position #%d out of %d attempts)\n", score, index, scoreQueue->size); // add position here
-        printf("Please enter 'e' to exit the program, or 'h' to view the leaderboard: ");
+        printf("Please enter 'e' to return to main menu, or 'h' to view the leaderboard: ");
     } else {
         printf("You didn't even attempt the quiz smh...\n");
         printf("Your total time to let everyone down was: %d h:%d m:%d s.\n", hoursTotal, minutesTotal, secondsTotal);
-        printf("Please enter 'e' to exit the program you disappointment: ");
+        printf("Please enter 'e' to reurn to main menu you disappointment: ");
     }
 
     char exitOrHigh = '\0';
@@ -422,7 +426,7 @@ int runQuiz() {
     while(exitOrHigh != 'E' && exitOrHigh != 'e') {
         scanf(" %c", &exitOrHigh); // remember space infront of %c to account for newline in input buffer
         if(exitOrHigh == 'E' || exitOrHigh == 'e') {
-            printf("Exiting program...\n");
+            printf("Returning to main menu...\n");
             sleep(1);
             system("clear");
         } else if(exitOrHigh == 'H' || exitOrHigh == 'h') {
@@ -432,7 +436,7 @@ int runQuiz() {
                 printf("%d. %.0f\n", i, leaderboardTraverse->value);
                 leaderboardTraverse = leaderboardTraverse->next;
             }
-            printf("\n\nPlease enter 'e' to exit the program, or 'h' to view the leaderboard: ");
+            printf("\n\nPlease enter 'e' to return to main menu, or 'h' to view the leaderboard: ");
         }
     }
     
@@ -442,30 +446,30 @@ int runQuiz() {
 }
 
 int main() {
-    printf("Welcome to the Quiz Game!\n\nPlease select the mode you wish to open the Quiz game in:\n");
-    printf("1: Play quiz\n");
-    printf("2: Edit Questionsets\n");
-    printf("E: Exit program\n");
     char charInput = '\0';
-    scanf(" %c", &charInput); // remember space infront of %c to account for newline in input buffer
-    if(charInput == 'E' || charInput == 'e') {
-        printf("Exiting program...('e' pressed)\n");
-        sleep(1);
-        system("clear");
-        return 0;
-    }
-    else if(charInput == '1') {
-        system("clear");
-        runQuiz();
-    }
-    else if(charInput == '2') {
-        system("clear");
-        editQuestionsets();
-        return 0;
-    }
-    else {
-        printf("Invalid Input\n");
-        return 1;
-    }
+    while(true){
+        printf("Welcome to the Quiz Game!\n\nPlease select the mode you wish to open the Quiz game in:\n");
+        printf("1: Play quiz\n");
+        printf("2: Edit questionsets\n");
+        printf("E: Exit program\n");
+        scanf(" %c", &charInput); // remember space infront of %c to account for newline in input buffer
 
+        if(charInput == 'E' || charInput == 'e') {
+            system("clear");
+            printf("Exiting program...('e' pressed)\n");
+            sleep(1);
+            system("clear");
+            break;
+        } else if(charInput == '1') {
+            system("clear");
+            runQuiz();
+        } else if(charInput == '2') {
+            system("clear");
+            editQuestionsets();
+        } else {
+            system("clear");
+            printf("Invalid Input\n");
+        }
+    }
+    return 0;
 }
