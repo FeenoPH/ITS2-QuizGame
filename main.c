@@ -245,6 +245,7 @@ char selectQuestionset() {
         return -1;
     }
     else {
+        system("clear");
         return charInput;
     }
 }
@@ -454,9 +455,11 @@ int main() {
         return 0;
     }
     else if(charInput == '1') {
+        system("clear");
         runQuiz();
     }
     else if(charInput == '2') {
+        system("clear");
         editQuestionsets();
         return 0;
     }
