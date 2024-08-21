@@ -368,7 +368,7 @@ int runQuiz() {
     if(secondsElapsed == 0 || finalRight == 0) {
         score = 0;
     } else {
-        score = (((secondsElapsed * TIME_WEIGHTING)/finalRight) * CORRECT_WEIGHTING) + 2 * ((finalRight * CORRECT_WEIGHTING) - (finalWrong * INCORRECT_PENALTY));
+        score = ((finalRight/(secondsElapsed * TIME_WEIGHTING)) * CORRECT_WEIGHTING) + 2 * ((finalRight * CORRECT_WEIGHTING) - (finalWrong * INCORRECT_PENALTY));
         if(score < 0) {
             score = 0;
         }
