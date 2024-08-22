@@ -209,7 +209,7 @@ void insertHighScoreQueue(highscoreQueue *scoreQueue, int value) {
     scoreQueue->size++;
 }
 
-char selectQuestionset() {
+char selectQuestionset(char mode) {
     while(true) {
         DIR *questionsetDirectory;
         char *directoryName = "questionsets";
@@ -236,12 +236,18 @@ char selectQuestionset() {
             dp = readdir(questionsetDirectory);
         }
         closedir(questionsetDirectory);
+        if (mode == 'e') {
+            printf("N: New questionset\n\n");
+        }
         printf("E: Return to main menu\n");
         printf("Your Selection: ");
         char charInput = '\0';
         scanf(" %c", &charInput); // remember space infront of %c to account for newline in input buffer
         int input = charInput - '0';
         if((input < 1 || input > questionSetsTotal) && charInput != 'e' && charInput != 'E') {
+            if((mode == 'e' && charInput == 'n') || (mode == 'e' && charInput == 'N')){
+                return charInput;
+            }
             system("clear");
             printf("Invalid choice.\n");
         } else {
@@ -251,12 +257,94 @@ char selectQuestionset() {
     }
 }
 
-void editQuestionsets() {
+int editQuestionsets() {
+    char qSet = selectQuestionset('e');
+    if(qSet == 'e'|| qSet == 'E') {
+        return 0;
+    }
 
+    if(qSet == 'n' || qSet == 'N') {
+        DIR *questionsetDirectory;
+        char *directoryName = "questionsets";
+        questionsetDirectory = opendir(directoryName);
+
+        struct dirent *dp;
+        dp = readdir(questionsetDirectory);
+        int fileNum = 1;
+
+        while (dp != NULL){
+            if (dp->d_type == DT_REG) {
+                fileNum++;
+            }
+            dp = readdir(questionsetDirectory);
+        }
+        closedir(questionsetDirectory);
+
+        FILE *file;
+        char filePath[101];
+        sprintf(filePath, "%s%i%s", "questionsets/questions", fileNum, ".txt");
+
+        file = fopen(filePath, "w");
+        if(file == NULL) {
+            printf("Could not create file\n");
+            return 1;
+        }
+
+        char questionsetSubject[31];
+        char questionsetTitle[34];
+        printf("Please Enter the Questionset Subject: ");
+        scanf("%s", questionsetSubject);
+        sprintf(questionsetTitle, "%c%s%c%c", '-', questionsetSubject, '-', '\n');
+        fprintf(file, questionsetTitle);
+        fclose(file); 
+    }
+    else {
+        char filePath[101];
+        sprintf(filePath, "%s%c%s", "questionsets/questions", qSet, ".txt");
+        FILE *file = fopen(filePath, "a");
+        if(file == NULL) {
+            printf("Could not open file\n");
+            return 1;
+        }
+        int addQuestions = 1;
+        while (addQuestions == 1) {
+            // Clear initial new line
+            while (getchar() != '\n');
+
+            char question[81];
+            char cQ;
+            int i = 0;
+            printf("Please enter your question: ");
+            while ((cQ = getchar()) != '\n'){
+                question[i++] = cQ;
+            }
+            question[i] = '\0';
+            i = 0;
+
+            char answer[21];
+            char cA;
+            printf("Please enter the answer to this question: ");
+            while ((cA = getchar()) != '\n'){
+                answer[i++] = cA;
+            }
+            answer[i] = '\0';
+
+            char questionAndAnswer[104];
+            sprintf(questionAndAnswer, "%s%c%s", question, '|', answer);
+            fprintf(file, "%s\n", questionAndAnswer);
+
+            char userContinue;
+            printf("Please enter E to exit, or any other key to continue creating questions: ");
+            scanf("%c", &userContinue);
+            if(userContinue == 'E' || userContinue == 'e') {
+                addQuestions = 0;
+            }
+        }
+    }
 }
 
 int runQuiz() {
-    char qSet = selectQuestionset();
+    char qSet = selectQuestionset('r');
     if(qSet == 'e'|| qSet == 'E') {
         return 0;
     }

@@ -1,0 +1,4 @@
+-Math-
+What is 1+1?|2
+What is 1*1?|1
+What is 1-1?|0
