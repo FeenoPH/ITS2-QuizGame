@@ -26,8 +26,9 @@ Week 3:
 
 Week 4:
   - Display highscores (GEORGE) Done!
-  - Appending new question to current document + inserting into queue (PHOENIX)
+  - Appending new question to current document + inserting into queue (PHOENIX) Done!
   - Selecting different questionsets (PHOENIX) Done!
+  - Creating new questionsets (PHOENIX) Done!
 
 
 Week 5: 
